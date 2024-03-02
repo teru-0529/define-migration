@@ -22,16 +22,13 @@ var (
 // FLAG
 var envFile string
 var sourceFile string
-var sourceTypeStr string
+var useLocal bool
 
 var (
 	postgres migration.Postgres
 	github   migration.Github
 	sources  migration.SourceSet
 )
-
-// ソース種類（Flag入力）
-var sourceType migration.SourceType
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -65,7 +62,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", "env file")
 	rootCmd.PersistentFlags().StringVarP(&sourceFile, "source-file", "", "source-setting.yaml", "source setting file")
 
-	rootCmd.PersistentFlags().StringVarP(&sourceTypeStr, "sourceType", "T", "sourceFile", "if setting one of the [\"github\",\"local\"], force change sourceType.")
+	rootCmd.PersistentFlags().BoolVarP(&useLocal, "use-local", "L", false, "if setting, force to use local migration file.")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -85,18 +82,11 @@ func initConfig() {
 	}
 
 	// ソースファイルの読込み
-	sources_, err := migration.NewSourceSet(sourceFile, github)
+	sources_, err := migration.NewSourceSet(sourceFile, github, useLocal)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
 	sources = *sources_
 	fmt.Printf("Using source file: %s\n", sourceFile)
-
-	// ソース種類の変換
-	sourceType = migration.SourceType(sourceTypeStr)
-	if !sourceType.Varidate() {
-		log.Println("input flag error: 'sourceType' must be one of the [\"github\",\"local\"]. ")
-		os.Exit(1)
-	}
 }

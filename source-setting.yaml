@@ -4,7 +4,7 @@ sources:
     gitRepository: sandbox-20240104
     gitTag: v1.0.2
   - schema: products
-    sourceType: github
+    sourceType: github2
     gitRepository: postgres-golang-migrate
     gitTag: null
   - schema: inventories

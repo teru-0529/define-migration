@@ -1,12 +1,10 @@
 package migration
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"slices"
 
-	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,13 +17,7 @@ type SourceType string
 var (
 	GITHUB     SourceType = "github"
 	LOCAL_FILE SourceType = "local"
-	DEFAULT    SourceType = "sourceFile"
 )
-
-// INFO: SourceTypeの種類チェック
-func (sourceType SourceType) Varidate() bool {
-	return slices.Contains([]SourceType{GITHUB, LOCAL_FILE, DEFAULT}, sourceType)
-}
 
 // ----+----+----+----+----+----+----+----+----+----
 
@@ -38,12 +30,13 @@ type SourceSet struct {
 
 type Source struct {
 	SchemaName string     `yaml:"schema"`
-	SourceType SourceType `yaml:"sourceType"`
 	Repository string     `yaml:"gitRepository"`
 	Tag        string     `yaml:"gitTag"`
+	SourceType SourceType `yaml:"sourceType"`
 }
 
-func NewSourceSet(path string, github Github) (*SourceSet, error) {
+// ソースファイルの読み込み
+func NewSourceSet(path string, github Github, useLocal bool) (*SourceSet, error) {
 	// INFO: read
 	file, err := os.ReadFile(path)
 	if err != nil {
@@ -57,14 +50,30 @@ func NewSourceSet(path string, github Github) (*SourceSet, error) {
 		return nil, err
 	}
 
-	// INFO: validation
-	for _, source := range sources.SourceArray {
-		if !slices.Contains([]SourceType{GITHUB, LOCAL_FILE}, source.SourceType) {
-			return nil, errors.New("schema file error: 'sourceType' must be one of the [\"github\",\"local\"]")
+	// INFO: sourceTypeの設定
+	for i, source := range sources.SourceArray {
+		// 強制ローカルファイル利用の場合
+		if useLocal {
+			sources.SourceArray[i].SourceType = LOCAL_FILE
 		}
 
+		// ソース種類が不明文字列の場合
+		if !slices.Contains([]SourceType{GITHUB, LOCAL_FILE}, source.SourceType) {
+			fmt.Printf(
+				"warnings: 'sourceType'[\"%s\"] of 'schema'[\"%s\"] is converted \"local\" , because of 'sourceType' must be one of the [\"github\",\"local\"]\n",
+				source.SourceType,
+				source.SchemaName,
+			)
+			sources.SourceArray[i].SourceType = LOCAL_FILE
+		}
+
+		// リポジトリ設定がないのに、ソース種類がGithubの場合
 		if source.SourceType == GITHUB && source.Repository == "" {
-			return nil, errors.New("schema file error: 'githubRepository' is required if 'sourceType' is [\"github\"]")
+			fmt.Printf(
+				"warnings: 'sourceType' of 'schema'[\"%s\"] is converted \"local\" , because of required 'githubRepository' if 'sourceType' is [\"github\"]\n",
+				source.SchemaName,
+			)
+			sources.SourceArray[i].SourceType = LOCAL_FILE
 		}
 	}
 
@@ -80,31 +89,27 @@ func NewSourceSet(path string, github Github) (*SourceSet, error) {
 	return &sources, nil
 }
 
-// INFO:ソース情報取得
-func (sources *SourceSet) Get(schemaName string) (*Source, error) {
-	source, isOk := sources.sourceMap[schemaName]
-	if isOk {
-		return &source, nil
+// INFO: ソース存在確認
+func (sources *SourceSet) Exist(schemaName string) bool {
+	_, isOk := sources.sourceMap[schemaName]
+	return isOk
+}
+
+// INFO: ソース入力先
+func (sources *SourceSet) SourceUrl(schemaName string) string {
+	source, existSource := sources.sourceMap[schemaName]
+	if !existSource {
+		panic("source not exist!")
+	}
+
+	if source.SourceType == GITHUB {
+		return source.githubSource(sources.github)
 	} else {
-		return nil, fmt.Errorf("schema[\"%s\"] is not exist for schema file", schemaName)
+		return source.fileSource()
 	}
 }
 
 // ----+----+----+----+----+----+----+----+----+----
-
-func (sources *SourceSet) SourceUrl(schemaName string, forceSourceType SourceType) (string, bool) {
-	source, existSource := sources.sourceMap[schemaName]
-	if !existSource {
-		return "", existSource
-	}
-	sourceType := lo.Ternary(forceSourceType == DEFAULT, source.SourceType, forceSourceType)
-
-	if sourceType == GITHUB {
-		return source.githubSource(sources.github), existSource
-	} else {
-		return source.fileSource(), existSource
-	}
-}
 
 // githubソース
 func (source *Source) githubSource(github Github) string {

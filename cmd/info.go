@@ -23,16 +23,17 @@ var infoCmd = &cobra.Command{
 		}
 		schemaName := args[0]
 
-		sourceUrl, hasSource := sources.SourceUrl(schemaName, sourceType)
 		// INFO: スキーマの存在確認
+		hasSource := sources.Exist(schemaName)
 		if !hasSource {
 			return fmt.Errorf("schema[\"%s\"] is not exist for schema file", schemaName)
 		}
 
 		// INFO: 情報表示
 		fmt.Printf("schema name: %s\n", schemaName)
-		fmt.Printf("[source  ] %s\n", sourceUrl)
+		fmt.Printf("[source  ] %s\n", sources.SourceUrl(schemaName))
 		fmt.Printf("[database] %s\n", postgres.DatabaseUrl(schemaName))
+		fmt.Println(useLocal)
 
 		return nil
 	},
