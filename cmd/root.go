@@ -5,17 +5,30 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/teru-0529/define-migration/models/migration"
 )
 
+// バージョン
 var (
 	version     string
 	releaseDate string
 )
-var cfgFile string
+
+// FLAG
+var envFile string
+var sourceFile string
+var useLocal bool
+
+var (
+	postgres migration.Postgres
+	github   migration.Github
+	sources  migration.SourceSet
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -40,34 +53,40 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.AddCommand(createCmd)
+	rootCmd.AddCommand(infoCmd)
 	rootCmd.AddCommand(upCmd)
 	rootCmd.AddCommand(downCmd)
 	rootCmd.AddCommand(mirrorCmd)
 	rootCmd.AddCommand(versionCmd)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.define-migration.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", "env file")
+	rootCmd.PersistentFlags().StringVarP(&sourceFile, "source-file", "", "source-setting.yaml", "source setting file")
+
+	rootCmd.PersistentFlags().BoolVarP(&useLocal, "use-local", "L", false, "if setting, force to use local migration file.")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".define-migration" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".define-migration")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
+	viper.SetConfigType("env")
+	viper.SetConfigFile(envFile)
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+	if err := viper.Unmarshal(&postgres); err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	if err := viper.Unmarshal(&github); err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	// ソースファイルの読込み
+	sources_, err := migration.NewSourceSet(sourceFile, github, useLocal)
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	sources = *sources_
+	fmt.Printf("Using source file: %s\n", sourceFile)
 }

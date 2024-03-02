@@ -17,7 +17,6 @@ services:
     user: root
     volumes:
       - ./data/init:/docker-entrypoint-initdb.d
-    #   - postgres_data:/var/lib/postgresql/data/
     networks:
       - app_network
 
