@@ -19,17 +19,19 @@ var (
 	releaseDate string
 )
 
-// 設定ファイル
+// FLAG
 var envFile string
 var schemaFile string
+var sourceTypeStr string
+
 var (
 	postgres migration.Postgres
 	github   migration.Github
 	schemas  migration.SchemaSet
 )
 
-// 入力値
-var sorcetypeStr string
+// 入力種類（Flag入力）
+var sourceType migration.SourceType
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -63,14 +65,13 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", "env file")
 	rootCmd.PersistentFlags().StringVarP(&schemaFile, "schema-file", "", "schema-setting.yaml", "schema setting file")
 
-	rootCmd.PersistentFlags().StringVarP(&sorcetypeStr, "sourceType", "S", "settingFile", "if setting one of the [\"github\",\"local\"], force change sourceType.")
+	rootCmd.PersistentFlags().StringVarP(&sourceTypeStr, "sourceType", "T", "settingFile", "if setting one of the [\"github\",\"local\"], force change sourceType.")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	viper.SetConfigType("env")
 	viper.SetConfigFile(envFile)
-
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
@@ -82,6 +83,8 @@ func initConfig() {
 		log.Println(err)
 		os.Exit(1)
 	}
+
+	// スキーマファイルの読込み
 	schemas_, err := migration.NewSchemaSet(schemaFile)
 	if err != nil {
 		log.Println(err)
@@ -89,4 +92,11 @@ func initConfig() {
 	}
 	schemas = *schemas_
 	fmt.Printf("Using schema file: %s\n", schemaFile)
+
+	// ソース種類の変換
+	sourceType = migration.SourceType(sourceTypeStr)
+	if !sourceType.Varidate() {
+		log.Println("input flag error: 'sourceType' must be one of the [\"github\",\"local\"]. ")
+		os.Exit(1)
+	}
 }

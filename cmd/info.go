@@ -33,6 +33,7 @@ var infoCmd = &cobra.Command{
 		fmt.Println(postgres)
 		fmt.Println(github)
 		fmt.Println(schemas)
+		fmt.Println(sourceType)
 		return nil
 	},
 }

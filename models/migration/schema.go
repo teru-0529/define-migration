@@ -65,7 +65,12 @@ func NewSchemaSet(path string) (*SchemaSet, error) {
 	return &schemas, nil
 }
 
-// 存在チェック
+// SourceTypeの種類チェック
+func (sourceType SourceType) Varidate() bool {
+	return slices.Contains([]SourceType{GITHUB, LOCAL_FILE, DEFAULT}, sourceType)
+}
+
+// スキーマ存在チェック
 func (schemas *SchemaSet) Exist(name string) bool {
 	_, ok := schemas.sMap[name]
 	return ok
