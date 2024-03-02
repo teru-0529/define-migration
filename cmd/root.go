@@ -21,16 +21,16 @@ var (
 
 // FLAG
 var envFile string
-var schemaFile string
+var sourceFile string
 var sourceTypeStr string
 
 var (
 	postgres migration.Postgres
-	github   migration.GithubOrganization
-	schemas  migration.SchemaSet
+	github   migration.Github
+	sources  migration.SourceSet
 )
 
-// 入力種類（Flag入力）
+// ソース種類（Flag入力）
 var sourceType migration.SourceType
 
 // rootCmd represents the base command when called without any subcommands
@@ -63,9 +63,9 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 
 	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", "env file")
-	rootCmd.PersistentFlags().StringVarP(&schemaFile, "schema-file", "", "schema-setting.yaml", "schema setting file")
+	rootCmd.PersistentFlags().StringVarP(&sourceFile, "source-file", "", "source-setting.yaml", "source setting file")
 
-	rootCmd.PersistentFlags().StringVarP(&sourceTypeStr, "sourceType", "T", "settingFile", "if setting one of the [\"github\",\"local\"], force change sourceType.")
+	rootCmd.PersistentFlags().StringVarP(&sourceTypeStr, "sourceType", "T", "sourceFile", "if setting one of the [\"github\",\"local\"], force change sourceType.")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -84,14 +84,14 @@ func initConfig() {
 		os.Exit(1)
 	}
 
-	// スキーマファイルの読込み
-	schemas_, err := migration.NewSchemaSet(schemaFile)
+	// ソースファイルの読込み
+	sources_, err := migration.NewSourceSet(sourceFile, github)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	schemas = *schemas_
-	fmt.Printf("Using schema file: %s\n", schemaFile)
+	sources = *sources_
+	fmt.Printf("Using source file: %s\n", sourceFile)
 
 	// ソース種類の変換
 	sourceType = migration.SourceType(sourceTypeStr)

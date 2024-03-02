@@ -1,9 +1,22 @@
 package migration
 
+import "fmt"
+
 // DB(Postgres)
 type Postgres struct {
 	User     string `mapstructure:"POSTGRES_USER"`
 	Password string `mapstructure:"POSTGRES_PASSWORD"`
 	Port     string `mapstructure:"POSTGRES_PORT"`
 	Db       string `mapstructure:"POSTGRES_DB"`
+}
+
+func (postgres *Postgres) DatabaseUrl(schema string) string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@db:%s/%s?sslmode=disable&x-migrations-table=migrate_%s",
+		postgres.User,
+		postgres.Password,
+		postgres.Port,
+		postgres.Db,
+		schema,
+	)
 }
