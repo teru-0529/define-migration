@@ -18,9 +18,11 @@ var (
 	releaseDate string
 )
 var envFile string
+var schemaFile string
 var (
 	postgres migration.Postgres
 	github   migration.Github
+	schemas  migration.SchemaSet
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -52,7 +54,8 @@ func init() {
 	rootCmd.AddCommand(mirrorCmd)
 	rootCmd.AddCommand(versionCmd)
 
-	rootCmd.PersistentFlags().StringVarP(&envFile, "env", "", ".env", ".env file (default is .env)")
+	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", ".env file (default is .env)")
+	rootCmd.PersistentFlags().StringVarP(&schemaFile, "schema-file", "", "schema-setting.yaml", "schema setting file")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -71,4 +74,11 @@ func initConfig() {
 		log.Println(err)
 		os.Exit(1)
 	}
+	schemas_, err := migration.NewSchemaSet(schemaFile)
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	schemas = *schemas_
+	fmt.Printf("Using schema file: %s\n", schemaFile)
 }
