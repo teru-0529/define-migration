@@ -3,7 +3,6 @@ module github.com/teru-0529/define-migration
 go 1.21.5
 
 require (
-	github.com/samber/lo v1.39.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	gopkg.in/yaml.v3 v3.0.1
