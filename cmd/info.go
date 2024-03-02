@@ -33,7 +33,6 @@ var infoCmd = &cobra.Command{
 		fmt.Printf("schemaName: %s\n", schemaName)
 		fmt.Printf("[source  ] %s\n", sources.SourceUrl(schemaName))
 		fmt.Printf("[database] %s\n", postgres.DatabaseUrl(schemaName))
-		fmt.Println(useLocal)
 
 		return nil
 	},
