@@ -4,6 +4,7 @@ Copyright © 2024 Teruaki Sato <andrea.pirlo.0529@gmail.com>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -18,22 +19,21 @@ var infoCmd = &cobra.Command{
 
 		// INFO: 引数の入力確認
 		if len(args) < 1 {
-			fmt.Println("please input schema name for args[0].")
-			return nil
+			return errors.New("please input schema name for args[0]")
 		}
 		schemaName := args[0]
 
+		sourceUrl, hasSource := sources.SourceUrl(schemaName, sourceType)
 		// INFO: スキーマの存在確認
-		if !schemas.Exist(schemaName) {
-			fmt.Printf("schema[\"%s\"] is not exist for schema file.\n", schemaName)
-			return nil
+		if !hasSource {
+			return fmt.Errorf("schema[\"%s\"] is not exist for schema file", schemaName)
 		}
 
-		fmt.Println(schemaName)
-		fmt.Println(postgres)
-		fmt.Println(github)
-		fmt.Println(schemas)
-		fmt.Println(sourceType)
+		// INFO: 情報表示
+		fmt.Printf("schema name: %s\n", schemaName)
+		fmt.Printf("[source  ] %s\n", sourceUrl)
+		fmt.Printf("[database] %s\n", postgres.DatabaseUrl(schemaName))
+
 		return nil
 	},
 }

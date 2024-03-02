@@ -10,6 +10,7 @@ type Postgres struct {
 	Db       string `mapstructure:"POSTGRES_DB"`
 }
 
+// INFO: データベース出力先
 func (postgres *Postgres) DatabaseUrl(schema string) string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@db:%s/%s?sslmode=disable&x-migrations-table=migrate_%s",

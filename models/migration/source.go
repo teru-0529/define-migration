@@ -6,6 +6,7 @@ import (
 	"os"
 	"slices"
 
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,7 +22,7 @@ var (
 	DEFAULT    SourceType = "sourceFile"
 )
 
-// SourceTypeの種類チェック
+// INFO: SourceTypeの種類チェック
 func (sourceType SourceType) Varidate() bool {
 	return slices.Contains([]SourceType{GITHUB, LOCAL_FILE, DEFAULT}, sourceType)
 }
@@ -59,11 +60,11 @@ func NewSourceSet(path string, github Github) (*SourceSet, error) {
 	// INFO: validation
 	for _, source := range sources.SourceArray {
 		if !slices.Contains([]SourceType{GITHUB, LOCAL_FILE}, source.SourceType) {
-			return nil, errors.New("schema file error: 'sourceType' must be one of the [\"github\",\"local\"]. ")
+			return nil, errors.New("schema file error: 'sourceType' must be one of the [\"github\",\"local\"]")
 		}
 
 		if source.SourceType == GITHUB && source.Repository == "" {
-			return nil, errors.New("schema file error: 'githubRepository' is required if 'sourceType' is [\"github\"]. ")
+			return nil, errors.New("schema file error: 'githubRepository' is required if 'sourceType' is [\"github\"]")
 		}
 	}
 
@@ -79,20 +80,42 @@ func NewSourceSet(path string, github Github) (*SourceSet, error) {
 	return &sources, nil
 }
 
-// スキーマ存在チェック
-func (sources *SourceSet) Exist(schemaName string) bool {
-	_, isOk := sources.sourceMap[schemaName]
-	return isOk
+// INFO:ソース情報取得
+func (sources *SourceSet) Get(schemaName string) (*Source, error) {
+	source, isOk := sources.sourceMap[schemaName]
+	if isOk {
+		return &source, nil
+	} else {
+		return nil, fmt.Errorf("schema[\"%s\"] is not exist for schema file", schemaName)
+	}
 }
 
 // ----+----+----+----+----+----+----+----+----+----
 
-// Source(Github)
+func (sources *SourceSet) SourceUrl(schemaName string, forceSourceType SourceType) (string, bool) {
+	source, existSource := sources.sourceMap[schemaName]
+	if !existSource {
+		return "", existSource
+	}
+	sourceType := lo.Ternary(forceSourceType == DEFAULT, source.SourceType, forceSourceType)
 
-func FileSource(schema string) string {
-	return fmt.Sprintf("file://%s/%s", schema, sourceDir)
+	if sourceType == GITHUB {
+		return source.githubSource(sources.github), existSource
+	} else {
+		return source.fileSource(), existSource
+	}
 }
 
-// func (github Github) Source(schema Schema) string {
+// githubソース
+func (source *Source) githubSource(github Github) string {
+	if source.Tag == "" {
+		return fmt.Sprintf("%s/%s/%s", github.baseUrl(), source.Repository, sourceDir)
+	} else {
+		return fmt.Sprintf("%s/%s/%s#%s", github.baseUrl(), source.Repository, sourceDir, source.Tag)
+	}
+}
 
-// }
+// fileソース
+func (source *Source) fileSource() string {
+	return fmt.Sprintf("file://./%s/%s", source.SchemaName, sourceDir)
+}
