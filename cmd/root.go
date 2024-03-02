@@ -26,7 +26,7 @@ var sourceTypeStr string
 
 var (
 	postgres migration.Postgres
-	github   migration.Github
+	github   migration.GithubOrganization
 	schemas  migration.SchemaSet
 )
 
