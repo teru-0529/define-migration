@@ -45,6 +45,7 @@ archives:
       - LICENSE*
       - README*
       - .env
+      - source-setting.yaml
       - docker-compose.yaml
       - data/init/*
 
