@@ -45,6 +45,8 @@ archives:
       - LICENSE*
       - README*
       - .env
+      - docker-compose.yaml
+      - data/init/*
 
 changelog:
   sort: asc

@@ -25,3 +25,6 @@
   ```
 
   https://goreleaser.com/customization/builds/
+
+* postgres　バージョン
+  https://hub.docker.com/_/postgres
