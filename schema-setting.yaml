@@ -1,13 +1,13 @@
 schemas:
   - name: orders
-    migrateFrom: github
+    sourceType: github
     githubUrl: teru-0529/sandbox-20240104
     tag: v1.0.2
   - name: products
-    migrateFrom: github
+    sourceType: github
     githubUrl: teru-0529/postgres-golang-migrate
     tag: null
   - name: inventories
-    migrateFrom: local
+    sourceType: local
     githubUrl: null
     tag: null

@@ -13,10 +13,13 @@ import (
 	"github.com/teru-0529/define-migration/models/migration"
 )
 
+// バージョン
 var (
 	version     string
 	releaseDate string
 )
+
+// 設定ファイル
 var envFile string
 var schemaFile string
 var (
@@ -24,6 +27,9 @@ var (
 	github   migration.Github
 	schemas  migration.SchemaSet
 )
+
+// 入力値
+var sorcetypeStr string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -54,8 +60,10 @@ func init() {
 	rootCmd.AddCommand(mirrorCmd)
 	rootCmd.AddCommand(versionCmd)
 
-	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", ".env file (default is .env)")
+	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", "env file")
 	rootCmd.PersistentFlags().StringVarP(&schemaFile, "schema-file", "", "schema-setting.yaml", "schema setting file")
+
+	rootCmd.PersistentFlags().StringVarP(&sorcetypeStr, "sourceType", "S", "settingFile", "if setting one of the [\"github\",\"local\"], force change sourceType.")
 }
 
 // initConfig reads in config file and ENV variables if set.
