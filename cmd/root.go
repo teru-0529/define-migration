@@ -59,8 +59,8 @@ func init() {
 	rootCmd.AddCommand(mirrorCmd)
 	rootCmd.AddCommand(versionCmd)
 
-	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", "env file")
-	rootCmd.PersistentFlags().StringVarP(&sourceFile, "source-file", "", "source-setting.yaml", "source setting file")
+	rootCmd.PersistentFlags().StringVarP(&envFile, "env-file", "", ".env", "envFile path.")
+	rootCmd.PersistentFlags().StringVarP(&sourceFile, "source-file", "", "source-setting.yaml", "sourceFile path.")
 
 	rootCmd.PersistentFlags().BoolVarP(&useLocal, "use-local", "L", false, "if setting, force to use local migration file.")
 }
@@ -70,7 +70,7 @@ func initConfig() {
 	viper.SetConfigType("env")
 	viper.SetConfigFile(envFile)
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		fmt.Fprintln(os.Stderr, "Using configFile:", viper.ConfigFileUsed())
 	}
 	if err := viper.Unmarshal(&postgres); err != nil {
 		log.Println(err)
@@ -88,5 +88,5 @@ func initConfig() {
 		os.Exit(1)
 	}
 	sources = *sources_
-	fmt.Printf("Using source file: %s\n", sourceFile)
+	fmt.Printf("Using sourceFile: %s\n", sourceFile)
 }
