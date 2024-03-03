@@ -28,3 +28,6 @@
 
 * postgres　バージョン
   https://hub.docker.com/_/postgres
+
+* golang-migrateでのPostgreSQLマイグレーション備忘録
+  https://zenn.dev/keyamin/articles/24695c455c1591
