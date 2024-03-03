@@ -122,5 +122,5 @@ func (source *Source) githubSource(github Github) string {
 
 // fileソース
 func (source *Source) fileSource() string {
-	return fmt.Sprintf("file://./%s/%s", source.SchemaName, sourceDir)
+	return fmt.Sprintf("file://./src/%s/%s", source.SchemaName, sourceDir)
 }
