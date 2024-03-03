@@ -26,7 +26,7 @@ var infoCmd = &cobra.Command{
 		// INFO: スキーマの存在確認
 		hasSource := sources.Exist(schemaName)
 		if !hasSource {
-			return fmt.Errorf("schema[\"%s\"] is not exist for sourceFile", schemaName)
+			return fmt.Errorf("schema[\"%s\"] is undefined for sourceFile", schemaName)
 		}
 
 		// INFO: 情報表示
