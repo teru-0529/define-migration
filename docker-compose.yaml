@@ -2,8 +2,8 @@ version: "3.8"
 
 services:
   db:
-    image: postgres:${POSTGRESS_VERSION}-bookworm
-    container_name: dx2-db
+    image: postgres:${POSTGRES_VERSION}-bookworm
+    container_name: db
     ports:
       - ${POSTGRES_HOST_PORT}:${POSTGRES_PORT}
     environment:
@@ -22,7 +22,7 @@ services:
 
   pgweb:
     image: sosedoff/pgweb
-    container_name: dx2-pgweb
+    container_name: pgweb
     ports:
       - ${PGWEB_HOST_PORT}:${PGWEB_PORT}
     environment:
