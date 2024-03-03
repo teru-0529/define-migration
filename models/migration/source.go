@@ -5,6 +5,7 @@ import (
 	"os"
 	"slices"
 
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 )
 
@@ -95,6 +96,29 @@ func (sources *SourceSet) Exist(schemaName string) bool {
 	return isOk
 }
 
+// INFO: スキーマリスト
+func (sources *SourceSet) Schemas() []string {
+	var keys []string
+	for k := range sources.sourceMap {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+// INFO: スキーマリストチェック（＋ユニーク化）
+func (sources *SourceSet) CheckSchemas(schemas []string) []string {
+	var keys []string
+	for _, k := range schemas {
+		hasSource := sources.Exist(k)
+		if hasSource {
+			keys = append(keys, k)
+		} else {
+			fmt.Printf("Warning: schema[\"%s\"] is excluded, because of undefined for sourceFile\n", k)
+		}
+	}
+	return lo.Uniq(keys)
+}
+
 // INFO: ソース入力先
 func (sources *SourceSet) SourceUrl(schemaName string) string {
 	source, existSource := sources.sourceMap[schemaName]
@@ -122,5 +146,5 @@ func (source *Source) githubSource(github Github) string {
 
 // fileソース
 func (source *Source) fileSource() string {
-	return fmt.Sprintf("file://./%s/%s", source.SchemaName, sourceDir)
+	return fmt.Sprintf("file://./src/%s/%s", source.SchemaName, sourceDir)
 }
