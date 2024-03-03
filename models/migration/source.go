@@ -60,7 +60,7 @@ func NewSourceSet(path string, github Github, useLocal bool) (*SourceSet, error)
 		// ソース種類が不明文字列の場合
 		if !slices.Contains([]SourceType{GITHUB, LOCAL_FILE}, source.SourceType) {
 			fmt.Printf(
-				"warnings: 'sourceType'[\"%s\"] of 'schema'[\"%s\"] is converted \"local\" , because of 'sourceType' must be one of the [\"github\",\"local\"]\n",
+				"Warning: 'sourceType'[\"%s\"] of 'schema'[\"%s\"] is forcibly converted \"local\" , because of 'sourceType' must be one of the [\"github\",\"local\"]\n",
 				source.SourceType,
 				source.SchemaName,
 			)
@@ -70,7 +70,7 @@ func NewSourceSet(path string, github Github, useLocal bool) (*SourceSet, error)
 		// リポジトリ設定がないのに、ソース種類がGithubの場合
 		if source.SourceType == GITHUB && source.Repository == "" {
 			fmt.Printf(
-				"warnings: 'sourceType' of 'schema'[\"%s\"] is converted \"local\" , because of required 'githubRepository' if 'sourceType' is [\"github\"]\n",
+				"Warning: 'sourceType' of 'schema'[\"%s\"] is forcibly converted \"local\" , because of required 'githubRepository' if 'sourceType' is [\"github\"]\n",
 				source.SchemaName,
 			)
 			sources.SourceArray[i].SourceType = LOCAL_FILE

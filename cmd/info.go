@@ -19,21 +19,20 @@ var infoCmd = &cobra.Command{
 
 		// INFO: 引数の入力確認
 		if len(args) < 1 {
-			return errors.New("please input schema name for args[0]")
+			return errors.New("please input schemaName for args[0]")
 		}
 		schemaName := args[0]
 
 		// INFO: スキーマの存在確認
 		hasSource := sources.Exist(schemaName)
 		if !hasSource {
-			return fmt.Errorf("schema[\"%s\"] is not exist for schema file", schemaName)
+			return fmt.Errorf("schema[\"%s\"] is undefined for sourceFile", schemaName)
 		}
 
 		// INFO: 情報表示
-		fmt.Printf("schema name: %s\n", schemaName)
+		fmt.Printf("schemaName: %s\n", schemaName)
 		fmt.Printf("[source  ] %s\n", sources.SourceUrl(schemaName))
 		fmt.Printf("[database] %s\n", postgres.DatabaseUrl(schemaName))
-		fmt.Println(useLocal)
 
 		return nil
 	},
