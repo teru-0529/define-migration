@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/teru-0529/define-migration/models/migration"
 )
 
 // infoCmd represents the info command
@@ -31,8 +32,12 @@ var infoCmd = &cobra.Command{
 
 		// INFO: 情報表示
 		fmt.Printf("schemaName: %s\n", schemaName)
-		fmt.Printf("[source  ] %s\n", sources.SourceUrl(schemaName))
-		fmt.Printf("[database] %s\n", postgres.DatabaseUrl(schemaName))
+		migrationIO := migration.MigrationIO{
+			Schema:   schemaName,
+			Source:   sources.SourceUrl(schemaName),
+			Database: postgres.DatabaseUrl(schemaName),
+		}
+		migrationIO.Show()
 
 		return nil
 	},
